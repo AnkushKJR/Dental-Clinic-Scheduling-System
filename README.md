@@ -1,10 +1,16 @@
-# Dental Clinic Scheduler
+# Dental Clinic Scheduling System
 
-A simple web application for scheduling dental operations across dentists, patients and operatories.
+A small web application built for the Certes Networks take-home assignment.
 
-The application generates a schedule while making sure that an operatory, dentist or patient is not assigned to overlapping operations.
+The application schedules dental operations while considering the availability of dentists, patients and operatories. It also compares different numbers of operatories to see whether adding more rooms actually improves the overall completion time.
 
-## Tech Stack
+## Live Demo
+
+**[Open the application](https://dental-clinic-scheduling-system.onrender.com/)**
+
+The application is deployed on Render, so the first request may take a little longer if the service has been inactive.
+
+## Tech Used
 
 * Java 17
 * Spring Boot
@@ -13,122 +19,118 @@ The application generates a schedule while making sure that an operatory, dentis
 * Thymeleaf
 * Maven
 * JUnit 5
+* Docker
 
-The application currently uses in-memory data. No database is required to run it.
-
-## Features
+## What the application does
 
 * Add dentists
 * Add patients
-* Add operations
-* Configure the number of operatories
+* Add dental operations
+* Select the number of operatories
 * Generate a schedule
-* Prevent operatory double booking
-* Prevent dentist conflicts
-* Prevent patient conflicts
-* Validate operation duration
-* Compare completion time with 1 to 10 operatories
-* Recommend the minimum number of operatories needed for the best completion time
+* Prevent an operatory from being double booked
+* Prevent a dentist from being scheduled for two operations at the same time
+* Prevent a patient from having overlapping operations
+* Validate operation duration from 1 to 8 hours
+* Compare schedules with 1 to 10 operatories
+* Show the recommended number of operatories
 
-## How to Run
+## Scheduling Approach
 
-Clone the repository and open the project.
+I used a greedy scheduling approach.
 
-Run:
+Operations are sorted by priority and then by duration, with longer operations being scheduled first when priorities are the same.
 
-```bash
-mvn spring-boot:run
-```
+For each operation, the scheduler checks:
 
-The application will start on:
+* When the assigned dentist is free
+* When the patient is free
+* When each operatory is free
 
-```text
-http://localhost:8080
-```
+The operation is then placed at the earliest time when all three are available.
 
-Open the above URL in a browser.
-
-To run the tests:
-
-```bash
-mvn test
-```
-
-## How Scheduling Works
-
-The scheduler uses a greedy approach.
-
-Operations are sorted using:
-
-1. Priority
-2. Duration (longer operations first)
-3. Operation ID
-
-For every operation, the scheduler checks when the following resources are available:
-
-* Assigned dentist
-* Patient
-* Each operatory
-
-The operation is started at the earliest time when all required resources are available.
-
-For example:
+For example, if:
 
 ```text
-Dentist available   : 11:00
-Patient available   : 09:00
-Operatory available : 10:00
+Dentist   → 11:00
+Patient   → 09:00
+Operatory → 10:00
 ```
 
-The operation can start at:
+the operation can start at 11:00.
+
+After scheduling it, the availability time of the dentist, patient and selected operatory is updated.
+
+## Operatory Comparison
+
+The application can run the same workload with different numbers of operatories.
+
+It checks:
 
 ```text
-11:00
-```
-
-After scheduling the operation, the availability time of the dentist, patient and selected operatory is updated.
-
-## Double Booking
-
-The scheduler prevents overlapping operations for:
-
-* The same operatory
-* The same dentist
-* The same patient
-
-This is important because even if multiple operatories are available, one dentist should not be scheduled for two patients at the same time.
-
-## Operatory Analysis
-
-The application also checks how the schedule changes when the clinic has different numbers of operatories.
-
-It evaluates:
-
-```text
-1 operator
+1 operatory
 2 operatories
 3 operatories
 ...
 10 operatories
 ```
 
-For each case, it calculates the time required to finish all operations.
+and compares the time required to finish all operations.
 
-The application recommends the smallest number of operatories that achieves the minimum completion time.
+The recommendation is the smallest number of operatories that gives the minimum completion time.
 
-For example:
+For example, if 3 operatories finish the workload in 6 hours and adding a 4th operatory still takes 6 hours, the application recommends 3.
 
-```text
-Operatories    Completion Time
+## Assumptions
 
-1              12 hours
-2               8 hours
-3               6 hours
-4               6 hours
-5               6 hours
+Some details were not specified in the assignment, so I made the following assumptions:
+
+* Each operation has one assigned dentist.
+* Each operation has one patient.
+* Each operation requires one operatory.
+* A dentist cannot perform two operations at the same time.
+* A patient cannot have two operations at the same time.
+* The clinic schedule starts at 09:00.
+* Operation durations are whole hours between 1 and 8.
+* Dentist working hours, breaks and holidays are not considered.
+* The scheduler is a heuristic and does not guarantee a mathematically optimal schedule.
+* Data is currently kept in memory and is not persisted in a database.
+
+## Running Locally
+
+Clone the repository:
+
+```bash
+git clone https://github.com/AnkushKJR/Dental-Clinic-Scheduling-System.git
 ```
 
-In this case, 3 operatories would be recommended because adding more operatories does not improve the completion time.
+Go into the application directory:
+
+```bash
+cd Dental-Clinic-Scheduling-System/dental-clinic-scheduler
+```
+
+Run the application:
+
+```bash
+mvn spring-boot:run
+```
+
+Then open:
+
+```text
+http://localhost:8080
+```
+
+## Running Tests
+
+Run:
+
+```bash
+mvn test
+```
+
+The tests cover the main scheduling rules, including operatory, dentist and patient conflicts, validation and operatory comparison.
 
 ## API
 
@@ -138,138 +140,39 @@ In this case, 3 operatories would be recommended because adding more operatories
 POST /api/schedules
 ```
 
-Example request:
-
-```json
-{
-  "numberOfOperatories": 2,
-  "dentists": [
-    {
-      "id": 1,
-      "name": "Dr. Smith"
-    },
-    {
-      "id": 2,
-      "name": "Dr. Johnson"
-    }
-  ],
-  "patients": [
-    {
-      "id": 101,
-      "name": "Alice"
-    },
-    {
-      "id": 102,
-      "name": "Bob"
-    }
-  ],
-  "operations": [
-    {
-      "id": 1,
-      "patientId": 101,
-      "dentistId": 1,
-      "durationHours": 4,
-      "priority": 1
-    },
-    {
-      "id": 2,
-      "patientId": 102,
-      "dentistId": 2,
-      "durationHours": 3,
-      "priority": 1
-    }
-  ]
-}
-```
-
-### Analyze Operator Efficiency
+### Compare Operator Efficiency
 
 ```http
 POST /api/schedules/optimize
 ```
 
-This evaluates the same set of operations using 1 to 10 operatories and returns the completion time for each configuration along with the recommended number of operatories.
-
-## Validation
-
-The application validates the main constraints from the assignment:
-
-* Number of operatories must be between 1 and 10.
-* Number of dentists must be between 1 and 10.
-* Operation duration must be between 1 and 8 hours.
-* Each operation must reference an existing dentist.
-* Each operation must reference an existing patient.
-
-Invalid requests return a `400 Bad Request` response.
-
-## Assumptions
-
-The assignment leaves some details open, so I made the following assumptions:
-
-* Each operation has one assigned dentist.
-* Each operation has one assigned patient.
-* Each operation requires one operatory.
-* A dentist cannot work on two operations at the same time.
-* A patient cannot have two operations at the same time.
-* The schedule starts at 09:00.
-* Operation durations are whole hours.
-* There are no breaks or dentist working-hour restrictions in the current version.
-* The scheduler uses a greedy approach and does not try to find a mathematically optimal schedule.
+Both endpoints accept the clinic data as JSON and return the generated scheduling information.
 
 ## Project Structure
 
 ```text
-src/main/java/com/certes/dentalclinic
-
-├── controller
-│   ├── GlobalExceptionHandler.java
-│   ├── HomeController.java
-│   └── ScheduleController.java
+dental-clinic-scheduler
 │
-├── dto
-│   ├── OptimizationResponse.java
-│   ├── ScheduleRequest.java
-│   ├── ScheduleResponse.java
-│   └── ScheduledOperationResponse.java
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com/certes/dentalclinic
+│   │   │       ├── controller
+│   │   │       ├── dto
+│   │   │       ├── model
+│   │   │       └── service
+│   │   │
+│   │   └── resources
+│   │       ├── templates
+│   │       └── application.properties
+│   │
+│   └── test
 │
-├── model
-│   ├── Dentist.java
-│   ├── Operation.java
-│   ├── Operatory.java
-│   └── Patient.java
-│
-└── service
-    └── SchedulingService.java
+├── Dockerfile
+├── pom.xml
+└── README.md
 ```
 
-## Tests
+## Possible Next Steps
 
-The project contains tests for the main scheduling rules, including:
-
-* Operatory double booking
-* Dentist overlap
-* Patient overlap
-* Invalid operation duration
-* Invalid number of operatories
-* Invalid dentist
-* Parallel scheduling with multiple operatories
-* Operatory optimization
-
-Run them with:
-
-```bash
-mvn test
-```
-
-## Possible Improvements
-
-If this were developed further, some possible additions would be:
-
-* Database support
-* Login and user roles
-* Dentist working hours
-* Clinic holidays and breaks
-* Appointment rescheduling
-* Appointment cancellation
-* Calendar-style schedule view
-* More advanced scheduling/optimization algorithms
+If this were extended beyond the assignment, I would consider adding database persistence, dentist working hours, appointment rescheduling/cancellation and a calendar-style view for the generated schedule.
