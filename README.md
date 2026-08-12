@@ -1,7 +1,5 @@
 # Dental Clinic Scheduling System
 
-A small web application built for the Certes Networks take-home assignment.
-
 The application schedules dental operations while considering the availability of dentists, patients and operatories. It also compares different numbers of operatories to see whether adding more rooms actually improves the overall completion time.
 
 ## Live Demo
