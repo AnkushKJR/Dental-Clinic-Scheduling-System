@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dental Clinic Scheduler</title>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-soft: #eff6ff;
+            --navy: #0f172a;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --surface: #ffffff;
+            --background: #f1f5f9;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --danger: #dc2626;
+            --danger-soft: #fef2f2;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+            --shadow-hover: 0 14px 34px rgba(15, 23, 42, 0.11);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 32%),
+                var(--background);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .header {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a 0%, #173b57 55%, #1d4ed8 140%);
+            color: white;
+            padding: 34px 24px 38px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+        }
+
+        .header::before,
+        .header::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            pointer-events: none;
+        }
+
+        .header::before {
+            width: 260px;
+            height: 260px;
+            right: -70px;
+            top: -120px;
+        }
+
+        .header::after {
+            width: 150px;
+            height: 150px;
+            right: 180px;
+            bottom: -100px;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-icon {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.13);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 25px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(25px, 4vw, 34px);
+            letter-spacing: -0.6px;
+            line-height: 1.15;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.13);
+        }
+
+        .container {
+            width: min(1200px, calc(100% - 32px));
+            margin: 28px auto 50px;
+        }
+
+        .page-intro {
+            margin: 0 0 20px;
+        }
+
+        .page-intro h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: -0.2px;
+        }
+
+        .page-intro p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .section-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 11px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 17px;
+        }
+
+        .card h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: 18px;
+            letter-spacing: -0.25px;
+        }
+
+        .card-description {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: minmax(180px, 260px) 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .field {
+            max-width: 280px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            background: #fff;
+            color: var(--text);
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+        }
+
+        .small-input {
+            width: 100%;
+        }
+
+        .helper-text {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .65px;
+            font-weight: 800;
+        }
+
+        td {
+            color: #334155;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background .15s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        td:first-child {
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge.priority-high {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .actions-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .actions-copy h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: 17px;
+        }
+
+        .actions-copy p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            min-height: 44px;
+            padding: 11px 17px;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 750;
+            font-size: 13px;
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, .22);
+        }
+
+        .primary:hover {
+            box-shadow: 0 8px 18px rgba(37, 99, 235, .28);
+        }
+
+        .secondary {
+            background: #f8fafc;
+            color: #334155;
+            border: 1px solid var(--border);
+        }
+
+        .secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            background: linear-gradient(145deg, #f8fafc, #ffffff);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 17px;
+        }
+
+        .summary-box::after {
+            content: "";
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            right: -30px;
+            top: -30px;
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .summary-box > div:first-child {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .summary-box .value {
+            margin-top: 5px;
+            font-size: 27px;
+            line-height: 1.1;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        .error {
+            background: var(--danger-soft);
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 13px 15px;
+            border-radius: 11px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        #scheduleSection,
+        #optimizationSection {
+            display: none;
+        }
+
+        .recommendation {
+            background: var(--success-soft);
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            border-left: 4px solid var(--success);
+            padding: 16px 18px;
+            margin-bottom: 18px;
+            border-radius: 11px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .recommendation strong {
+            color: #047857;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 760px) {
+            .header {
+                padding: 26px 18px 30px;
+            }
+
+            .header-content {
+                align-items: flex-start;
+            }
+
+            .header-badge {
+                display: none;
+            }
+
+            .container {
+                width: min(100% - 20px, 1200px);
+                margin-top: 18px;
+            }
+
+            .card {
+                padding: 18px;
+                border-radius: 13px;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field {
+                max-width: none;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-card {
+                align-items: stretch;
+            }
+
+            .actions {
+                width: 100%;
+            }
+
+            .actions button {
+                flex: 1 1 100%;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+
+    <h1>Dental Clinic Scheduler</h1>
+
+    <p>
+        Intelligent scheduling of patients, dentists and operatories
+    </p>
+
+</div>
+
+<div class="container">
+
+    <div class="page-intro">
+        <h2>Clinic Operations Dashboard</h2>
+        <p>Configure your clinic, review workload, and generate an optimized schedule.</p>
+    </div>
+
+    <div id="errorMessage" class="error"></div>
+
+    <!-- Configuration -->
+
+    <div class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">⚙</div><div><h2>Clinic Configuration</h2><p class="card-description">Set the available operatory capacity for the clinic.</p></div></div></div>
+
+        <div class="config-grid">
+        <div class="field">
+            <label for="operatories">Number of Operatories</label>
+            <input
+                id="operatories"
+                class="small-input"
+                type="number"
+                min="1"
+                max="10"
+                value="2">
+            <p class="helper-text">Choose between 1 and 10 operatories.</p>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Dentists -->
+
+    <div class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">👨‍⚕️</div><div><h2>Dentists</h2><p class="card-description">Available dental professionals for today’s workload.</p></div></div></div>
+
+        <div class="table-wrap"><table>
+
+            <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr>
+                <td><span class="badge priority-high">High</span></td>
+                <td>Dr. Smith</td>
+            </tr>
+
+            <tr>
+                <td><span class="badge">Normal</span></td>
+                <td>Dr. Johnson</td>
+            </tr>
+
+            </tbody>
+
+        </table></div>
+
+    </div>
+
+    <!-- Patients -->
+
+    <div class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">👤</div><div><h2>Patients</h2><p class="card-description">Patients currently included in the scheduling workload.</p></div></div></div>
+
+        <div class="table-wrap"><table>
+
+            <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr>
+                <td>101</td>
+                <td>Alice</td>
+            </tr>
+
+            <tr>
+                <td>102</td>
+                <td>Bob</td>
+            </tr>
+
+            <tr>
+                <td>103</td>
+                <td>Charlie</td>
+            </tr>
+
+            <tr>
+                <td>104</td>
+                <td>David</td>
+            </tr>
+
+            </tbody>
+
+        </table></div>
+
+    </div>
+
+    <!-- Operations -->
+
+    <div class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">📋</div><div><h2>Operations</h2><p class="card-description">Treatment operations, assigned dentists, durations and priorities.</p></div></div></div>
+
+        <div class="table-wrap"><table>
+
+            <thead>
+
+            <tr>
+                <th>Operation</th>
+                <th>Patient</th>
+                <th>Dentist</th>
+                <th>Duration</th>
+                <th>Priority</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr>
+                <td>OP-1</td>
+                <td>Alice</td>
+                <td>Dr. Smith</td>
+                <td>4 hours</td>
+                <td><span class="badge priority-high">High</span></td>
+            </tr>
+
+            <tr>
+                <td>OP-2</td>
+                <td>Bob</td>
+                <td>Dr. Johnson</td>
+                <td>3 hours</td>
+                <td><span class="badge priority-high">High</span></td>
+            </tr>
+
+            <tr>
+                <td>OP-3</td>
+                <td>Charlie</td>
+                <td>Dr. Smith</td>
+                <td>2 hours</td>
+                <td><span class="badge">Normal</span></td>
+            </tr>
+
+            <tr>
+                <td>OP-4</td>
+                <td>David</td>
+                <td>Dr. Johnson</td>
+                <td>1 hour</td>
+                <td><span class="badge">Normal</span></td>
+            </tr>
+
+            </tbody>
+
+        </table></div>
+
+    </div>
+
+    <!-- Actions -->
+
+    <div class="card actions-card">
+        <div class="actions-copy">
+            <h2>Scheduling Actions</h2>
+            <p>Run the scheduler or evaluate the ideal number of operatories.</p>
+        </div>
+
+        <div class="actions">
+            <button
+                    class="primary"
+                    onclick="generateSchedule()">
+                Generate Schedule
+            </button>
+
+            <button
+                    class="secondary"
+                    onclick="optimizeOperatories()">
+                Analyze Operatory Efficiency
+            </button>
+        </div>
+    </div>
+
+    <!-- Schedule -->
+
+    <div id="scheduleSection" class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">🗓️</div><div><h2>Generated Schedule</h2><p class="card-description">The schedule returned by the backend scheduling engine.</p></div></div></div>
+
+        <div id="scheduleSummary"
+             class="summary">
+        </div>
+
+        <div class="table-wrap"><table>
+
+            <thead>
+
+            <tr>
+                <th>Operation</th>
+                <th>Patient</th>
+                <th>Dentist</th>
+                <th>Operatory</th>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+
+            </thead>
+
+            <tbody id="scheduleBody">
+            </tbody>
+
+        </table></div>
+
+    </div>
+
+    <!-- Optimization -->
+
+    <div id="optimizationSection"
+         class="card">
+
+        <div class="card-heading"><div class="card-title"><div class="section-icon">📊</div><div><h2>Operatory Efficiency Analysis</h2><p class="card-description">Compare completion time across different operatory counts.</p></div></div></div>
+
+        <div
+                id="recommendation"
+                class="recommendation">
+        </div>
+
+        <div class="table-wrap"><table>
+
+            <thead>
+
+            <tr>
+                <th>Operatories</th>
+                <th>Completion Time</th>
+                <th>Improvement</th>
+            </tr>
+
+            </thead>
+
+            <tbody id="optimizationBody">
+            </tbody>
+
+        </table></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const dentists = [
+        {
+            id: 1,
+            name: "Dr. Smith"
+        },
+        {
+            id: 2,
+            name: "Dr. Johnson"
+        }
+    ];
+
+    const patients = [
+        {
+            id: 101,
+            name: "Alice"
+        },
+        {
+            id: 102,
+            name: "Bob"
+        },
+        {
+            id: 103,
+            name: "Charlie"
+        },
+        {
+            id: 104,
+            name: "David"
+        }
+    ];
+
+    const operations = [
+
+        {
+            id: 1,
+            patientId: 101,
+            dentistId: 1,
+            durationHours: 4,
+            priority: 1
+        },
+
+        {
+            id: 2,
+            patientId: 102,
+            dentistId: 2,
+            durationHours: 3,
+            priority: 1
+        },
+
+        {
+            id: 3,
+            patientId: 103,
+            dentistId: 1,
+            durationHours: 2,
+            priority: 2
+        },
+
+        {
+            id: 4,
+            patientId: 104,
+            dentistId: 2,
+            durationHours: 1,
+            priority: 2
+        }
+
+    ];
+
+    function createRequest() {
+
+        return {
+
+            numberOfOperatories:
+                Number(
+                    document.getElementById(
+                        "operatories"
+                    ).value
+                ),
+
+            dentists: dentists,
+
+            patients: patients,
+
+            operations: operations
+
+        };
+
+    }
+
+    async function generateSchedule() {
+
+        clearError();
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/schedules",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            createRequest()
+                        )
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Unable to generate schedule"
+                );
+
+            }
+
+            displaySchedule(data);
+
+        }
+        catch (error) {
+
+            showError(
+                error.message
+            );
+
+        }
+
+    }
+
+    function displaySchedule(data) {
+
+        const section =
+            document.getElementById(
+                "scheduleSection"
+            );
+
+        section.style.display = "block";
+
+        const summary =
+            document.getElementById(
+                "scheduleSummary"
+            );
+
+        summary.innerHTML = `
+
+            <div class="summary-box">
+
+                <div>Operatories</div>
+
+                <div class="value">
+                    ${data.numberOfOperatories}
+                </div>
+
+            </div>
+
+            <div class="summary-box">
+
+                <div>Completion Time</div>
+
+                <div class="value">
+                    ${data.completionTimeHours} hrs
+                </div>
+
+            </div>
+
+            <div class="summary-box">
+
+                <div>Operations Scheduled</div>
+
+                <div class="value">
+                    ${data.schedule.length}
+                </div>
+
+            </div>
+
+        `;
+
+        const body =
+            document.getElementById(
+                "scheduleBody"
+            );
+
+        body.innerHTML = "";
+
+        data.schedule.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+                row.innerHTML = `
+
+                    <td>
+                        OP-${item.operationId}
+                    </td>
+
+                    <td>
+                        ${getPatientName(
+                            item.patientId
+                        )}
+                    </td>
+
+                    <td>
+                        ${getDentistName(
+                            item.dentistId
+                        )}
+                    </td>
+
+                    <td>
+                        Operatory ${item.operatoryId}
+                    </td>
+
+                    <td>
+                        ${formatTime(
+                            item.startTime
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatTime(
+                            item.endTime
+                        )}
+                    </td>
+
+                `;
+
+                body.appendChild(row);
+
+            }
+        );
+
+    }
+
+    async function optimizeOperatories() {
+
+        clearError();
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/schedules/optimize",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            createRequest()
+                        )
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Unable to analyze operatories"
+                );
+
+            }
+
+            displayOptimization(data);
+
+        }
+        catch (error) {
+
+            showError(
+                error.message
+            );
+
+        }
+
+    }
+
+    function displayOptimization(data) {
+
+        const section =
+            document.getElementById(
+                "optimizationSection"
+            );
+
+        section.style.display = "block";
+
+        const recommendation =
+            document.getElementById(
+                "recommendation"
+            );
+
+        recommendation.innerHTML = `
+
+            <strong>
+                Recommended number of operatories:
+                ${data.recommendedOperatories}
+            </strong>
+
+            <br>
+
+            Minimum completion time:
+            ${data.minimumCompletionHours} hours
+
+            <br><br>
+
+            Increasing the number of operatories
+            beyond this point does not reduce
+            the overall completion time for the
+            current workload.
+
+        `;
+
+        const body =
+            document.getElementById(
+                "optimizationBody"
+            );
+
+        body.innerHTML = "";
+
+        data.comparisons.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+                row.innerHTML = `
+
+                    <td>
+                        ${item.numberOfOperatories}
+                    </td>
+
+                    <td>
+                        ${item.completionTimeHours}
+                        hours
+                    </td>
+
+                    <td>
+                        ${item.improvementPercentage
+                            .toFixed(1)}%
+                    </td>
+
+                `;
+
+                body.appendChild(row);
+
+            }
+        );
+
+    }
+
+    function getPatientName(id) {
+
+        const patient =
+            patients.find(
+                p => p.id === id
+            );
+
+        return patient
+            ? patient.name
+            : id;
+
+    }
+
+    function getDentistName(id) {
+
+        const dentist =
+            dentists.find(
+                d => d.id === id
+            );
+
+        return dentist
+            ? dentist.name
+            : id;
+
+    }
+
+    function formatTime(dateTime) {
+
+        return new Date(
+            dateTime
+        ).toLocaleTimeString(
+            [],
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    }
+
+    function showError(message) {
+
+        const error =
+            document.getElementById(
+                "errorMessage"
+            );
+
+        error.textContent = message;
+
+        error.style.display = "block";
+
+    }
+
+    function clearError() {
+
+        const error =
+            document.getElementById(
+                "errorMessage"
+            );
+
+        error.textContent = "";
+
+        error.style.display = "none";
+
+    }
+
+</script>
+
+</body>
+
+</html>
